@@ -1,0 +1,30 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Loan {
+  id                Int @id @default(autoincrement())
+  uuid              String @default(uuid()) @unique @db.Uuid
+  applicantName     String   @map("applicant_name")
+  propertyAddress   String   @map("property_address") 
+  creditScore       Int      @map("credit_score")
+  monthlyIncome     Decimal  @map("monthly_income") @db.Decimal(12, 2)
+  requestedAmount   Decimal  @map("requested_amount") @db.Decimal(12, 2)
+  loanTermMonths    Int      @map("loan_term_months")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  isEligable        Boolean? @map("is_eligable")
+  crimeGrade        String?  @map("crime_grade")
+}
