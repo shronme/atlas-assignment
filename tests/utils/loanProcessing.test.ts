@@ -42,6 +42,7 @@ test("loanProcessing eligable loan", async () => {
   const result = await loanProcessing(payload);
 
   expect(result).toHaveProperty("isEligable", true);
+  expect(result).toHaveProperty("decisionReason", "All checks passed");
 });
 
 test("loanProcessing credit score too low", async () => {
@@ -72,6 +73,7 @@ test("loanProcessing credit score too low", async () => {
   const result = await loanProcessing(payload);
 
   expect(result).toHaveProperty("isEligable", false);
+  expect(result).toHaveProperty("decisionReason", "credit score too low;");
 });
 
 test("loanProcessing credit LTV too low", async () => {
@@ -102,4 +104,8 @@ test("loanProcessing credit LTV too low", async () => {
   const result = await loanProcessing(payload);
 
   expect(result).toHaveProperty("isEligable", false);
+  expect(result).toHaveProperty(
+    "decisionReason",
+    "Debt-to-income ratio too high;"
+  );
 });

@@ -27,4 +27,5 @@ model Loan {
   updatedAt         DateTime @updatedAt @map("updated_at")
   isEligable        Boolean? @map("is_eligable")
   crimeGrade        String?  @map("crime_grade")
+  decisionReason    String?  @map("decision_reason")
 }

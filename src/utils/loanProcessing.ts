@@ -40,18 +40,33 @@ export const loanProcessing = async (payload: LoanInput) => {
   } = payload;
   const zipcode = propertyAddress.split(" ").pop()! || "00000";
   const crimeGrade = isCrimeGradeAcceptable(zipcode);
-  let isEligable = false;
-  if (
-    isCreditScoreAcceptable(creditScore) &&
-    isDebtToIncomeAcceptable(
-      monthlyIncome as number,
-      requestedAmount as number,
-      loanTermMonths as number
-    ) &&
-    crimeGrade.eligable
-  ) {
-    isEligable = true;
+
+  let decisionReasons = "";
+
+  const creditCheck = isCreditScoreAcceptable(creditScore);
+  const debtToIncomeCheck = isDebtToIncomeAcceptable(
+    monthlyIncome as number,
+    requestedAmount as number,
+    loanTermMonths
+  );
+  const crimeGradeCheck = crimeGrade.eligable;
+
+  const isEligable = creditCheck && debtToIncomeCheck && crimeGradeCheck;
+
+  if (isEligable) {
+    decisionReasons = "All checks passed";
+  } else {
+    if (!creditCheck) {
+      decisionReasons += "credit score too low; ";
+    }
+    if (!debtToIncomeCheck) {
+      decisionReasons += "Debt-to-income ratio too high; ";
+    }
+    if (!crimeGradeCheck) {
+      decisionReasons += "Area crime grade too high; ";
+    }
   }
+
   const loanData = {
     applicantName,
     propertyAddress,
@@ -65,10 +80,13 @@ export const loanProcessing = async (payload: LoanInput) => {
     loanTermMonths,
     crimeGrade: crimeGrade.crimeGrade,
     isEligable: isEligable,
+    decisionReason: decisionReasons.trim(),
   };
-  await prisma.loan.create({
+  const createdLoan = await prisma.loan.create({
     data: loanData,
   });
 
-  return loanData;
+  const returnedLoanData = { ...loanData, uuid: createdLoan.uuid };
+
+  return returnedLoanData;
 };
