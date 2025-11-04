@@ -4,22 +4,6 @@ const anchorClient = new AnchorClient({
   apiKey: process.env.ANCHOR_API_KEY,
 });
 
-// const config = {
-//   browser: {
-//     web_bot_auth: {
-//       active: true,
-//     },
-//   },
-//   proxy: {
-//     active: true,
-//     type: "anchor_residential",
-//     country_code: "us",
-//   },
-// } as any;
-// const session = await anchorClient.sessions.create(config);
-
-// const sessionId: string = session.data?.id || "";
-// console.log("Anchor session created with ID:", sessionId);
 export const getCrimegrade = async (zipcode: string) => {
   const executionStepLogs = [];
 

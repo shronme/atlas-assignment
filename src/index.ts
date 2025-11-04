@@ -19,11 +19,6 @@ const port = process.env.PORT || 3000;
 
 app.use(validateApiKey);
 
-app.get("/", async (_req: Request, res: Response) => {
-  const data = await getCrimegrade("90210");
-  res.send("Data retrieved " + data);
-});
-
 app.post(
   "/loan",
   validateLoanRequest,
