@@ -21,15 +21,22 @@ const isDebtToIncomeAcceptable = (
   return monthlyIncome >= (requestedAmount / loanTermMonths) * 1.5;
 };
 
-const isCrimeGradeAcceptable = (zipcode: string) => {
-  // Placeholder implementation; in a real scenario, this would query an external service.
-  const crimeGrade = "B";
+const isCrimeGradeAcceptable = (crimeGradeData: any) => {
   const uneligableGrades = ["F"];
-  return { eligable: !uneligableGrades.includes(crimeGrade), crimeGrade: "B" };
+  if (crimeGradeData.crimeGrade === "Unknown") {
+    return { eligable: false, crimeGrade: "Unknown" };
+  }
+  return {
+    eligable: !uneligableGrades.includes(crimeGradeData.crimeGrade),
+    crimeGrade: crimeGradeData.crimeGrade,
+  };
 };
 
 // Process a loan request: persist to the database and return the created record.
-export const loanProcessing = async (payload: LoanInput) => {
+export const loanProcessing = async (
+  payload: LoanInput,
+  crimeGradeData: any
+) => {
   const {
     applicantName,
     propertyAddress,
@@ -38,8 +45,8 @@ export const loanProcessing = async (payload: LoanInput) => {
     requestedAmount,
     loanTermMonths,
   } = payload;
-  const zipcode = propertyAddress.split(" ").pop()! || "00000";
-  const crimeGrade = isCrimeGradeAcceptable(zipcode);
+
+  const crimeGrade = isCrimeGradeAcceptable(crimeGradeData);
 
   let decisionReasons = "";
 

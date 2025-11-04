@@ -23,6 +23,7 @@ test("loanProcessing eligable loan", async () => {
     loanTermMonths: 24,
   };
   const monthlyIncomeDecimal = new Decimal(payload.monthlyIncome);
+  const crimeGrade = { eligable: true, crimeGrade: "A" };
   const requestedAmountDecimal = new Decimal(payload.requestedAmount);
   (prisma.loan.create as Mock).mockResolvedValue({
     id: 1,
@@ -39,7 +40,7 @@ test("loanProcessing eligable loan", async () => {
     crimeGrade: null,
   }) as any;
 
-  const result = await loanProcessing(payload);
+  const result = await loanProcessing(payload, crimeGrade);
 
   expect(result).toHaveProperty("isEligable", true);
   expect(result).toHaveProperty("decisionReason", "All checks passed");
@@ -54,6 +55,7 @@ test("loanProcessing credit score too low", async () => {
     requestedAmount: 20000,
     loanTermMonths: 24,
   };
+  const crimeGrade = { eligable: true, crimeGrade: "A" };
   const monthlyIncomeDecimal = new Decimal(payload.monthlyIncome);
   const requestedAmountDecimal = new Decimal(payload.requestedAmount);
   (prisma.loan.create as Mock).mockResolvedValue({
@@ -70,7 +72,7 @@ test("loanProcessing credit score too low", async () => {
     isEligable: null,
     crimeGrade: null,
   }) as any;
-  const result = await loanProcessing(payload);
+  const result = await loanProcessing(payload, crimeGrade);
 
   expect(result).toHaveProperty("isEligable", false);
   expect(result).toHaveProperty("decisionReason", "credit score too low;");
@@ -85,6 +87,7 @@ test("loanProcessing credit LTV too low", async () => {
     requestedAmount: 150000,
     loanTermMonths: 24,
   };
+  const crimeGrade = { eligable: true, crimeGrade: "A" };
   const monthlyIncomeDecimal = new Decimal(payload.monthlyIncome);
   const requestedAmountDecimal = new Decimal(payload.requestedAmount);
   (prisma.loan.create as Mock).mockResolvedValue({
@@ -101,11 +104,43 @@ test("loanProcessing credit LTV too low", async () => {
     isEligable: null,
     crimeGrade: null,
   }) as any;
-  const result = await loanProcessing(payload);
+  const result = await loanProcessing(payload, crimeGrade);
 
   expect(result).toHaveProperty("isEligable", false);
   expect(result).toHaveProperty(
     "decisionReason",
     "Debt-to-income ratio too high;"
   );
+});
+
+test("loanProcessing crime grade too high", async () => {
+  const payload = {
+    applicantName: "John Doe",
+    propertyAddress: "123 Main St 90210",
+    creditScore: 720,
+    monthlyIncome: 6500,
+    requestedAmount: 1500,
+    loanTermMonths: 24,
+  };
+  const crimeGrade = { eligable: true, crimeGrade: "F" };
+  const monthlyIncomeDecimal = new Decimal(payload.monthlyIncome);
+  const requestedAmountDecimal = new Decimal(payload.requestedAmount);
+  (prisma.loan.create as Mock).mockResolvedValue({
+    id: 1,
+    uuid: "some-uuid",
+    applicantName: "John Doe",
+    propertyAddress: "123 Main St 90210",
+    creditScore: 720,
+    monthlyIncome: monthlyIncomeDecimal,
+    requestedAmount: requestedAmountDecimal,
+    loanTermMonths: 24,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    isEligable: null,
+    crimeGrade: null,
+  }) as any;
+  const result = await loanProcessing(payload, crimeGrade);
+
+  expect(result).toHaveProperty("isEligable", false);
+  expect(result).toHaveProperty("decisionReason", "Area crime grade too high;");
 });

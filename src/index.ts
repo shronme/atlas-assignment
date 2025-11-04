@@ -29,7 +29,9 @@ app.post(
   handleValidationResult,
   async (_req: Request, res: Response) => {
     const payload: LoanInput = _req.body;
-    const loan = await loanProcessing(payload);
+    const zipcode = payload.propertyAddress.split(" ").pop()! || "00000";
+    const crimeGradeData = await getCrimegrade(zipcode);
+    const loan = await loanProcessing(payload, crimeGradeData);
     console.log("Created loan request:", loan);
     return res.status(201).json(loan);
   }
