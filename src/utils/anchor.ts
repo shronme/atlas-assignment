@@ -39,7 +39,6 @@ export const getCrimegrade = async (zipcode: string) => {
           console.log("Agent step:", executionStep);
           executionStepLogs.push(executionStep);
         },
-        agent: "openai-cua",
         detectElements: true,
       },
       // sessionId: sessionId,
