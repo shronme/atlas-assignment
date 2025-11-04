@@ -9,6 +9,7 @@ import {
 } from "./middleware/validators.js";
 import { getCrimegrade } from "./utils/anchor.js";
 import { loanProcessing, type LoanInput } from "./utils/loanProcessing.js";
+import { enqueueLoan } from "./utils/jobQueue.js";
 
 const app = express();
 
@@ -30,10 +31,15 @@ app.post(
   async (_req: Request, res: Response) => {
     const payload: LoanInput = _req.body;
     const zipcode = payload.propertyAddress.split(" ").pop()! || "00000";
-    const crimeGradeData = await getCrimegrade(zipcode);
-    const loan = await loanProcessing(payload, crimeGradeData);
-    console.log("Created loan request:", loan);
-    return res.status(201).json(loan);
+
+    // Enqueue for background processing and return immediately.
+    // We don't await getCrimegrade here to keep the request fast; the
+    // background worker will fetch crime-grade and complete processing.
+    const jobId = enqueueLoan(payload);
+    console.log(`Enqueued loan job ${jobId} for zipcode ${zipcode}`);
+    // Return 200 OK immediately; 202 Accepted would be more RESTful but
+    // returning 200 to match your preference.
+    return res.status(200).json({ status: "processing" });
   }
 );
 
