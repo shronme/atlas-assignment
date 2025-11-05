@@ -69,3 +69,8 @@ export const enqueueLoan = (
 };
 
 export const queueLength = () => queue.length;
+
+// Start a periodic worker to pick up any stray jobs (in case setImmediate misses)
+setInterval(() => {
+  if (!running && queue.length > 0) setImmediate(worker);
+}, 5000);
